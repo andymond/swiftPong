@@ -55,7 +55,6 @@
                                     <color key="titleColor" systemColor="systemGreenColor" red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
                                 <connections>
-                                    <action selector="easy:" destination="Xv9-64-YyG" eventType="touchUpInside" id="5ZV-GE-ok8"/>
                                     <action selector="medium:" destination="Xv9-64-YyG" eventType="touchUpInside" id="kJ6-XD-yzR"/>
                                 </connections>
                             </button>

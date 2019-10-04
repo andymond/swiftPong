@@ -9,8 +9,12 @@
 import SpriteKit
 import GameplayKit
 
+protocol TransitionDelegate: SKSceneDelegate {
+  func returnToMenu()
+}
+
 class GameScene: SKScene {
-    
+  let quitLabel = SKLabelNode(text: "Quit")
   var ball = SKSpriteNode()
   var enemyPaddle = SKSpriteNode()
   var mainPaddle = SKSpriteNode()
@@ -21,6 +25,11 @@ class GameScene: SKScene {
   var enemyScoreLabel = SKLabelNode()
 
   var score = [Int]()
+
+  override func sceneDidLoad() {
+    super.sceneDidLoad()
+    print("SCENE DID LOAD")
+  }
 
   override func didMove(to view: SKView) {
     layoutScene()
@@ -34,6 +43,7 @@ class GameScene: SKScene {
   }
 
   func layoutScene() {
+    configureQuitLabel()
     self.scaleMode = .aspectFit
     mainScoreLabel = self.childNode(withName: "mainScoreLabel") as! SKLabelNode
     enemyScoreLabel = self.childNode(withName: "enemyScoreLabel") as! SKLabelNode
@@ -47,6 +57,14 @@ class GameScene: SKScene {
     border.friction = 0
     border.restitution = 1
     self.physicsBody = border
+  }
+
+  func configureQuitLabel() {
+    quitLabel.name = "quit"
+    quitLabel.fontName = "PressStart2P"
+    quitLabel.position = CGPoint(x: 0, y: 0)
+    quitLabel.isHidden = true
+    self.addChild(quitLabel)
   }
 
   func addScore(_ player: SKSpriteNode) {
@@ -67,7 +85,31 @@ class GameScene: SKScene {
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     for touch in touches {
       let location = touch.location(in: self)
-      mainPaddle.run(SKAction.moveTo(x: location.x, duration: 0.2))
+
+      if self.isPaused {
+        let touched = atPoint(location)
+        if touched.name == "quit" {
+          guard let delegate = self.delegate else { return }
+          self.view?.presentScene(nil)
+          (delegate as! TransitionDelegate).returnToMenu()
+        }
+      }
+
+      if touch.tapCount >= 2 {
+        handlePause()
+      } else {
+        mainPaddle.run(SKAction.moveTo(x: location.x, duration: 0.2))
+      }
+    }
+  }
+
+  func handlePause() {
+    if self.isPaused == true {
+      quitLabel.isHidden = true
+      self.isPaused = false
+    } else {
+      quitLabel.isHidden = false
+      self.isPaused = true
     }
   }
 
@@ -138,11 +180,15 @@ class GameScene: SKScene {
     case .easy:
       enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.7))
     case .medium:
-      enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.5))
+      enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.6))
     case .hard:
       enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.4))
     case .twoPlayer:
       break
     }
+  }
+
+  deinit {
+      print("\n THE SCENE \((type(of: self))) WAS REMOVED FROM MEMORY (DEINIT) \n")
   }
 }

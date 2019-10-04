@@ -21,6 +21,7 @@ class MenuViewController: UIViewController {
   @IBAction func easy(_ sender: Any) {
     moveToGame(.easy)
   }
+
   @IBAction func medium(_ sender: Any) {
     moveToGame(.medium)
   }
@@ -35,7 +36,7 @@ class MenuViewController: UIViewController {
 
   func moveToGame(_ type: gameType) {
     let gameVC = self.storyboard?.instantiateViewController(withIdentifier: "gameViewController") as! GameViewController
-
+    print("MOVE TO GAME")
     currentGameType = type
 
     self.navigationController?.pushViewController(gameVC, animated: true)

@@ -20,6 +20,7 @@ class GameViewController: UIViewController {
     if let view = self.view as! SKView? {
       if let scene = SKScene(fileNamed: "GameScene") {
         scene.scaleMode = .aspectFit
+        scene.delegate = self as TransitionDelegate
         view.presentScene(scene)
       }
 
@@ -41,5 +42,11 @@ class GameViewController: UIViewController {
 
   override var prefersStatusBarHidden: Bool {
       return true
+  }
+}
+
+extension GameViewController: TransitionDelegate {
+  func returnToMenu() {
+    self.navigationController?.popViewController(animated: true)
   }
 }
