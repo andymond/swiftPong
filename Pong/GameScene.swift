@@ -15,6 +15,7 @@ class GameScene: SKScene {
   var enemyPaddle = SKSpriteNode()
   var mainPaddle = SKSpriteNode()
   var ballStartYPosition = CGFloat(0)
+  var initialForce = 20.0
 
   var mainScoreLabel = SKLabelNode()
   var enemyScoreLabel = SKLabelNode()
@@ -28,7 +29,8 @@ class GameScene: SKScene {
 
   func startGame() {
     score = [0, 0]
-    ball.physicsBody?.applyImpulse(CGVector(dx: -20, dy: -20))
+    configureDifficulty()
+    ball.physicsBody?.applyImpulse(CGVector(dx: -initialForce, dy: -initialForce))
   }
 
   func layoutScene() {
@@ -50,14 +52,15 @@ class GameScene: SKScene {
   func addScore(_ player: SKSpriteNode) {
     ball.position = CGPoint(x: 0, y: 0)
     ball.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
+    initialForce += 0.5
     if player == mainPaddle {
       score[0] += 1
       mainScoreLabel.text = "\(score[0])"
-      ball.physicsBody?.applyImpulse(CGVector(dx: 20, dy: 20))
+      ball.physicsBody?.applyImpulse(CGVector(dx: initialForce, dy: initialForce))
     } else if player == enemyPaddle {
       score[1] += 1
       enemyScoreLabel.text = "\(score[1])"
-      ball.physicsBody?.applyImpulse(CGVector(dx: -20, dy: -20))
+      ball.physicsBody?.applyImpulse(CGVector(dx: -initialForce, dy: -initialForce))
     }
   }
 
@@ -75,7 +78,6 @@ class GameScene: SKScene {
         if location.y > 0 {
           enemyPaddle.run(SKAction.moveTo(x: location.x, duration: 0.2))
         }
-
         if location.y < 0 {
           mainPaddle.run(SKAction.moveTo(x: location.x, duration: 0.2))
         }
@@ -102,16 +104,33 @@ class GameScene: SKScene {
     configureEnemy()
   }
 
+  func configureDifficulty() {
+    switch currentGameType {
+    case .medium:
+      enemyPaddle.physicsBody?.restitution = 1.1
+      initialForce += 1
+    case .hard:
+      ball.physicsBody?.allowsRotation = true
+      enemyPaddle.physicsBody?.restitution = 1.4
+      initialForce += 5
+    case .twoPlayer:
+      ball.physicsBody?.restitution = 1.1
+      ball.physicsBody?.allowsRotation = true
+    default:
+      break
+    }
+  }
+
   func configureEnemy() {
     switch currentGameType {
     case .easy:
-      enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.5))
+      enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.7))
     case .medium:
-      enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.25))
-    case .hard:
-      enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.01))
-    case .twoPlayer:
       enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.5))
+    case .hard:
+      enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.3))
+    case .twoPlayer:
+      break
     }
   }
 }
