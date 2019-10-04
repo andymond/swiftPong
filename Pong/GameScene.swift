@@ -22,12 +22,13 @@ class GameScene: SKScene {
   var score = [Int]()
 
   override func didMove(to view: SKView) {
-    startGame()
     layoutScene()
+    startGame()
   }
 
   func startGame() {
     score = [0, 0]
+    ball.physicsBody?.applyImpulse(CGVector(dx: -20, dy: -20))
   }
 
   func layoutScene() {
@@ -40,7 +41,6 @@ class GameScene: SKScene {
     mainPaddle = self.childNode(withName: "mainPaddle") as! SKSpriteNode
 
     ballStartYPosition = ball.position.y
-    ball.physicsBody?.applyImpulse(CGVector(dx: -20, dy: -20))
     let border = SKPhysicsBody(edgeLoopFrom: self.frame)
     border.friction = 0
     border.restitution = 1
@@ -69,9 +69,20 @@ class GameScene: SKScene {
   }
 
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-    if let touch = touches.first {
+    for touch in touches {
       let location = touch.location(in: self)
-      mainPaddle.run(SKAction.moveTo(x: location.x, duration: 0.2))
+      if currentGameType == .twoPlayer {
+        if location.y > 0 {
+          enemyPaddle.run(SKAction.moveTo(x: location.x, duration: 0.2))
+        }
+
+        if location.y < 0 {
+          mainPaddle.run(SKAction.moveTo(x: location.x, duration: 0.2))
+        }
+
+      } else {
+        mainPaddle.run(SKAction.moveTo(x: location.x, duration: 0.2))
+      }
     }
   }
 
@@ -87,6 +98,20 @@ class GameScene: SKScene {
       ball.physicsBody?.applyImpulse(CGVector(dx: 0, dy: yForce))
     }
     ballStartYPosition = ball.position.y
-    enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.5))
+
+    configureEnemy()
+  }
+
+  func configureEnemy() {
+    switch currentGameType {
+    case .easy:
+      enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.5))
+    case .medium:
+      enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.25))
+    case .hard:
+      enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.01))
+    case .twoPlayer:
+      enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.5))
+    }
   }
 }
