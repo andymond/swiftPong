@@ -14,7 +14,7 @@ class GameScene: SKScene {
   var ball = SKSpriteNode()
   var enemyPaddle = SKSpriteNode()
   var mainPaddle = SKSpriteNode()
-  var ballStartYPosition = CGFloat(0)
+  var ballStartPosition = CGPoint(x: 0.0, y: 0.0)
   var initialForce = 20.0
 
   var mainScoreLabel = SKLabelNode()
@@ -42,7 +42,7 @@ class GameScene: SKScene {
 
     mainPaddle = self.childNode(withName: "mainPaddle") as! SKSpriteNode
 
-    ballStartYPosition = ball.position.y
+    ballStartPosition = ball.position
     let border = SKPhysicsBody(edgeLoopFrom: self.frame)
     border.friction = 0
     border.restitution = 1
@@ -89,19 +89,31 @@ class GameScene: SKScene {
   }
 
   override func update(_ currentTime: TimeInterval) {
+    keepScore()
+    preventUnidirectionalMotionLoops()
+    configureEnemy()
+  }
+
+  func keepScore() {
     if ball.position.y <= mainPaddle.position.y - 25 {
       addScore(enemyPaddle)
     } else if ball.position.y >= enemyPaddle.position.y + 25 {
       addScore(mainPaddle)
     }
+  }
 
-    if ball.position.y == ballStartYPosition {
-      let yForce = ballStartYPosition > 0 ? -1 : 1
-      ball.physicsBody?.applyImpulse(CGVector(dx: 0, dy: yForce))
+  func preventUnidirectionalMotionLoops() {
+    if abs(ball.position.y - ballStartPosition.y) < 2 {
+      let yForce = ballStartPosition.y > 0 ? -1 : 1
+      ball.physicsBody?.applyImpulse(CGVector(dx: 1, dy: yForce))
     }
-    ballStartYPosition = ball.position.y
 
-    configureEnemy()
+    if ballStartPosition.x == ball.position.x {
+      let xForce = ballStartPosition.y > 0 ? -1 : 1
+      ball.physicsBody?.applyImpulse(CGVector(dx: xForce, dy: 1))
+    }
+
+    ballStartPosition = ball.position
   }
 
   func configureDifficulty() {
@@ -128,7 +140,7 @@ class GameScene: SKScene {
     case .medium:
       enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.5))
     case .hard:
-      enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.3))
+      enemyPaddle.run(SKAction.moveTo(x: ball.position.x, duration: 0.4))
     case .twoPlayer:
       break
     }
